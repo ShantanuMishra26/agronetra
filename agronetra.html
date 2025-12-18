@@ -37,12 +37,19 @@ body {
 .top {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
-.back, .lang {
+.back {
   font-size: 13px;
   color: #2e7d32;
   cursor: pointer;
+}
+
+select {
+  font-size: 12px;
+  padding: 4px;
+  border-radius: 6px;
 }
 
 .center { text-align: center; }
@@ -129,44 +136,86 @@ img {
 </style>
 
 <script>
-let lang="EN";
+let lang = "EN";
 let farmer="", locationName="", mode="CROP", confidence=94;
 const fakeLocation="Sagar, India";
 
-const text={
-  EN:{
-    start:"Get Started",
-    next:"Next",
-    login:"Login",
-    crop:"🌱 Crop Analysis",
-    soil:"🧪 Soil Analysis",
-    analyze:"🤖 Analyze",
-    thank:"Thank you for using AgroNetra!"
+/* LANGUAGE TEXTS */
+const text = {
+  EN: {
+    start:"Get Started", next:"Next", login:"Login",
+    crop:"🌱 Crop Analysis", soil:"🧪 Soil Analysis",
+    analyze:"🤖 Analyze", thank:"Thank you for using AgroNetra!",
+    about:"AI-powered decision support for farmers.",
+    works:"📷 Capture → 🤖 Analyze → ✅ Decide",
+    select:"Select Analysis Type"
   },
-  HI:{
-    start:"शुरू करें",
-    next:"आगे",
-    login:"लॉगिन",
-    crop:"🌱 फसल विश्लेषण",
-    soil:"🧪 मिट्टी विश्लेषण",
-    analyze:"🤖 विश्लेषण करें",
-    thank:"एग्रोनैत्रा उपयोग करने के लिए धन्यवाद!"
+  HI: {
+    start:"शुरू करें", next:"आगे", login:"लॉगिन",
+    crop:"🌱 फसल विश्लेषण", soil:"🧪 मिट्टी विश्लेषण",
+    analyze:"🤖 विश्लेषण करें", thank:"एग्रोनैत्रा उपयोग करने के लिए धन्यवाद!",
+    about:"किसानों के लिए एआई आधारित समाधान।",
+    works:"📷 फोटो → 🤖 विश्लेषण → ✅ निर्णय",
+    select:"विश्लेषण प्रकार चुनें"
+  },
+  TE:{ start:"ప్రారంభించండి", next:"తదుపరి", login:"లాగిన్",
+    crop:"🌱 పంట విశ్లేషణ", soil:"🧪 మట్టి విశ్లేషణ",
+    analyze:"🤖 విశ్లేషించండి", thank:"AgroNetra ఉపయోగించినందుకు ధన్యవాదాలు!",
+    about:"రైతుల కోసం AI ఆధారిత పరిష్కారం",
+    works:"📷 చిత్రము → 🤖 విశ్లేషణ → ✅ నిర్ణయం",
+    select:"విశ్లేషణ రకం ఎంచుకోండి"
+  },
+  TA:{ start:"தொடங்கு", next:"அடுத்து", login:"உள்நுழை",
+    crop:"🌱 பயிர் பகுப்பாய்வு", soil:"🧪 மண் பகுப்பாய்வு",
+    analyze:"🤖 பகுப்பாய்வு", thank:"AgroNetra பயன்படுத்தியதற்கு நன்றி!",
+    about:"விவசாயிகளுக்கான AI தீர்வு",
+    works:"📷 படம் → 🤖 பகுப்பு → ✅ முடிவு",
+    select:"பகுப்பாய்வு வகையைத் தேர்ந்தெடுக்கவும்"
+  },
+  ML:{ start:"ആരംഭിക്കുക", next:"അടുത്തത്", login:"ലോഗിൻ",
+    crop:"🌱 വിള വിശകലനം", soil:"🧪 മണ്ണ് വിശകലനം",
+    analyze:"🤖 വിശകലനം", thank:"AgroNetra ഉപയോഗിച്ചതിന് നന്ദി!",
+    about:"കർഷകർക്ക് AI പരിഹാരം",
+    works:"📷 ചിത്രം → 🤖 വിശകലനം → ✅ തീരുമാനം",
+    select:"വിശകലന തരം തിരഞ്ഞെടുക്കുക"
+  },
+  MR:{ start:"सुरू करा", next:"पुढे", login:"लॉगिन",
+    crop:"🌱 पीक विश्लेषण", soil:"🧪 माती विश्लेषण",
+    analyze:"🤖 विश्लेषण करा", thank:"AgroNetra वापरल्याबद्दल धन्यवाद!",
+    about:"शेतकऱ्यांसाठी AI उपाय",
+    works:"📷 फोटो → 🤖 विश्लेषण → ✅ निर्णय",
+    select:"विश्लेषण प्रकार निवडा"
+  },
+  GU:{ start:"શરૂ કરો", next:"આગળ", login:"લોગિન",
+    crop:"🌱 પાક વિશ્લેષણ", soil:"🧪 માટી વિશ્લેષણ",
+    analyze:"🤖 વિશ્લેષણ", thank:"AgroNetra વાપરવા બદલ આભાર!",
+    about:"ખેડૂતો માટે AI ઉકેલ",
+    works:"📷 ફોટો → 🤖 વિશ્લેષણ → ✅ નિર્ણય",
+    select:"વિશ્લેષણ પ્રકાર પસંદ કરો"
+  },
+  BN:{ start:"শুরু করুন", next:"পরবর্তী", login:"লগইন",
+    crop:"🌱 ফসল বিশ্লেষণ", soil:"🧪 মাটি বিশ্লেষণ",
+    analyze:"🤖 বিশ্লেষণ", thank:"AgroNetra ব্যবহারের জন্য ধন্যবাদ!",
+    about:"কৃষকদের জন্য AI সমাধান",
+    works:"📷 ছবি → 🤖 বিশ্লেষণ → ✅ সিদ্ধান্ত",
+    select:"বিশ্লেষণের ধরন নির্বাচন করুন"
+  },
+  AS:{ start:"আৰম্ভ কৰক", next:"পিছলৈ", login:"লগইন",
+    crop:"🌱 শস্য বিশ্লেষণ", soil:"🧪 মাটি বিশ্লেষণ",
+    analyze:"🤖 বিশ্লেষণ", thank:"AgroNetra ব্যৱহাৰৰ বাবে ধন্যবাদ!",
+    about:"কৃষকৰ বাবে AI সমাধান",
+    works:"📷 ছবি → 🤖 বিশ্লেষণ → ✅ সিদ্ধান্ত",
+    select:"বিশ্লেষণ প্ৰকাৰ বাছক"
   }
 };
 
-function vibrate(ms=40){
-  if(navigator.vibrate) navigator.vibrate(ms);
-}
-
 function show(id){
-  vibrate();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function toggleLang(){
-  lang = lang==="EN"?"HI":"EN";
-  langBtn.innerText = lang==="EN"?"हिंदी":"English";
+function changeLang(val){
+  lang = val;
   updateText();
 }
 
@@ -179,28 +228,27 @@ function updateText(){
   soilBtn.innerText=text[lang].soil;
   analyzeBtn.innerText=text[lang].analyze;
   thankText.innerText=text[lang].thank;
+  aboutText.innerText=text[lang].about;
+  worksText.innerText=text[lang].works;
+  selectTitle.innerText=text[lang].select;
 }
 
 function saveLogin(){
-  farmer=farmerInput.value || "Shantanu";
-  locationName=locationInput.value || fakeLocation;
-  gpsText.innerText="📍 Detected Location: "+locationName;
+  farmer=farmerInput.value||"Shantanu";
+  locationName=locationInput.value||fakeLocation;
   show('select');
 }
 
-/* OPTION 1: CAMERA ON MODE SELECTION */
 function setMode(m){
   mode=m;
   confidence=(m==="CROP")?94:91;
   hiddenCamera.click();
 }
 
-/* Handle capture */
 function handleCapture(){
   const file=hiddenCamera.files[0];
   if(!file) return;
   show('upload');
-
   const r=new FileReader();
   r.onload=e=>{
     previewImg.src=e.target.result;
@@ -213,7 +261,6 @@ function analyze(){
   progress.style.display="block";
   result.style.display="none";
   bar.style.width="0%";
-
   let p=0;
   let i=setInterval(()=>{
     p+=10;
@@ -227,31 +274,18 @@ function analyze(){
 }
 
 function showResult(){
-  const reportFile=(mode==="CROP")
-    ?"samplereport_crop.pdf"
-    :"samplereport_soil.pdf";
-
+  const reportFile=(mode==="CROP")?"samplereport_crop.pdf":"samplereport_soil.pdf";
   result.innerHTML=`
     <div class="ring" id="ring">0%</div>
-    <p>
-      <b>👨‍🌾 Farmer:</b> ${farmer}<br>
-      <b>📍 Location:</b> ${locationName}<br>
-      <b>${mode==="CROP"?"🌱 Disease":"🧪 Soil Health"}:</b>
-      ${mode==="CROP"?"Leaf Blight":"Nitrogen Deficient"}
-    </p>
-
+    <p><b>${mode==="CROP"?"🌱 Disease":"🧪 Soil Health"}:</b>
+    ${mode==="CROP"?"Leaf Blight":"Nitrogen Deficient"}</p>
     <a href="${reportFile}" target="_blank">
       <button>📄 Download Detailed Report</button>
     </a>
-
-    <button onclick="show('thank')">Finish</button>
-  `;
-
+    <button onclick="show('thank')">Finish</button>`;
   const ring=document.getElementById("ring");
-  ring.style.background=
-    `conic-gradient(#2e7d32 ${confidence*3.6}deg, #c8e6c9 0deg)`;
+  ring.style.background=`conic-gradient(#2e7d32 ${confidence*3.6}deg,#c8e6c9 0deg)`;
   ring.innerText=confidence+"%";
-
   result.style.display="block";
 }
 </script>
@@ -261,84 +295,78 @@ function showResult(){
 
 <div class="phone">
 
-<!-- HIDDEN CAMERA -->
-<input type="file" id="hiddenCamera"
-  accept="image/*" capture="environment"
-  style="display:none" onchange="handleCapture()">
+<input type="file" id="hiddenCamera" accept="image/*" capture="environment"
+style="display:none" onchange="handleCapture()">
 
 <!-- TITLE -->
 <div id="title" class="page active center">
   <div class="top">
     <span></span>
-    <span id="langBtn" class="lang" onclick="toggleLang()">हिंदी</span>
+    <select onchange="changeLang(this.value)">
+      <option value="EN">English</option>
+      <option value="HI">Hindi</option>
+      <option value="TE">Telugu</option>
+      <option value="TA">Tamil</option>
+      <option value="ML">Malayalam</option>
+      <option value="MR">Marathi</option>
+      <option value="GU">Gujarati</option>
+      <option value="BN">Bengali</option>
+      <option value="AS">Assamese</option>
+    </select>
   </div>
   <img src="logo.png" width="80">
   <h1>AgroNetra</h1>
-  <p>AI-Powered Crop Health Intelligence</p>
+  <p id="aboutText"></p>
   <button id="startBtn" onclick="show('about')">Get Started</button>
 </div>
 
 <!-- ABOUT -->
 <div id="about" class="page">
-  <div class="top">
-    <span class="back" onclick="show('title')">← Back</span>
-    <span class="lang" onclick="toggleLang()">🌐</span>
-  </div>
-  <h2>About AgroNetra</h2>
+  <div class="top"><span class="back" onclick="show('title')">← Back</span></div>
+  <h2>About</h2>
   <img src="about.png">
-  <p>AI-powered decision support for farmers.</p>
+  <p id="aboutText"></p>
   <button id="next1" onclick="show('works')">Next</button>
 </div>
 
 <!-- WORKS -->
 <div id="works" class="page">
-  <div class="top">
-    <span class="back" onclick="show('about')">← Back</span>
-  </div>
+  <div class="top"><span class="back" onclick="show('about')">← Back</span></div>
   <h2>How It Works</h2>
-  <p>📷 Capture → 🤖 Analyze → ✅ Decide</p>
+  <p id="worksText"></p>
   <button id="next2" onclick="show('login')">Next</button>
 </div>
 
 <!-- LOGIN -->
 <div id="login" class="page">
-  <div class="top">
-    <span class="back" onclick="show('works')">← Back</span>
-  </div>
+  <div class="top"><span class="back" onclick="show('works')">← Back</span></div>
   <h2>Login</h2>
   <input id="farmerInput" placeholder="Farmer Name">
-  <input id="locationInput" placeholder="Location (optional)">
-  <p id="gpsText"></p>
+  <input id="locationInput" placeholder="Location">
   <button id="loginBtn" onclick="saveLogin()">Login</button>
 </div>
 
 <!-- SELECT -->
 <div id="select" class="page center">
-  <div class="top">
-    <span class="back" onclick="show('login')">← Back</span>
-  </div>
-  <h2>Select Analysis Type</h2>
-  <button id="cropBtn" onclick="setMode('CROP')">🌱 Crop Analysis</button>
-  <button id="soilBtn" class="alt" onclick="setMode('SOIL')">🧪 Soil Analysis</button>
+  <div class="top"><span class="back" onclick="show('login')">← Back</span></div>
+  <h2 id="selectTitle"></h2>
+  <button id="cropBtn" onclick="setMode('CROP')"></button>
+  <button id="soilBtn" class="alt" onclick="setMode('SOIL')"></button>
 </div>
 
 <!-- UPLOAD -->
 <div id="upload" class="page">
-  <div class="top">
-    <span class="back" onclick="show('select')">← Back</span>
-  </div>
-  <h2>Image Preview</h2>
-  <div id="previewBox" class="preview">
-    <img id="previewImg">
-  </div>
-  <button id="analyzeBtn" onclick="analyze()">Analyze</button>
+  <div class="top"><span class="back" onclick="show('select')">← Back</span></div>
+  <h2>Preview</h2>
+  <div id="previewBox" class="preview"><img id="previewImg"></div>
+  <button id="analyzeBtn" onclick="analyze()"></button>
   <div id="progress" class="progress"><div id="bar" class="bar"></div></div>
   <div id="result" class="result"></div>
 </div>
 
-<!-- THANK YOU -->
+<!-- THANK -->
 <div id="thank" class="page center">
-  <h2 id="thankText">Thank you for using AgroNetra!</h2>
+  <h2 id="thankText"></h2>
   <button onclick="show('title')">Restart</button>
 </div>
 
