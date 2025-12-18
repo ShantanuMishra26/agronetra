@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AgroNetra App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #e8f3ec;
+}
+
+.phone {
+  max-width: 390px;
+  margin: 20px auto;
+  background: #ffffff;
+  border-radius: 26px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+
+.page {
+  display: none;
+  padding: 22px;
+  animation: slide 0.4s ease;
+}
+
+.page.active { display: block; }
+
+@keyframes slide {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back, .lang {
+  font-size: 13px;
+  color: #2e7d32;
+  cursor: pointer;
+}
+
+.center { text-align: center; }
+
+h1, h2 { color: #2e7d32; }
+
+p { color: #444; font-size: 14px; }
+
+button {
+  width: 100%;
+  padding: 14px;
+  background: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  margin-top: 14px;
+}
+
+button.alt {
+  background: #9ccc65;
+  color: #1b5e20;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+img {
+  max-width: 100%;
+  border-radius: 14px;
+  margin-top: 12px;
+}
+
+/* Progress */
+.progress {
+  display: none;
+  margin-top: 12px;
+  background: #c8e6c9;
+  height: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 12px;
+  width: 0%;
+  background: #2e7d32;
+}
+
+/* Preview */
+.preview {
+  display: none;
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* Result */
+.result {
+  display: none;
+  margin-top: 14px;
+  background: #f1f8f4;
+  padding: 14px;
+  border-radius: 12px;
+}
+
+/* Confidence Ring */
+.ring {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 15px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #2e7d32;
+  background: conic-gradient(#2e7d32 0deg, #c8e6c9 0deg);
+}
+</style>
+
+<script>
+let lang = "EN";
+let farmer = "", locationName = "", mode = "CROP", confidence = 94;
+const fakeLocation = "Gurugram, Haryana";
+
+const text = {
+  EN: {
+    start: "Get Started",
+    next: "Next",
+    login: "Login",
+    crop: "🌱 Crop Analysis",
+    soil: "🧪 Soil Analysis",
+    analyze: "🤖 Analyze",
+    thank: "Thank you for using AgroNetra!"
+  },
+  HI: {
+    start: "शुरू करें",
+    next: "आगे",
+    login: "लॉगिन",
+    crop: "🌱 फसल विश्लेषण",
+    soil: "🧪 मिट्टी विश्लेषण",
+    analyze: "🤖 विश्लेषण करें",
+    thank: "एग्रोनैत्रा उपयोग करने के लिए धन्यवाद!"
+  }
+};
+
+function vibrate(ms=40){
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+function show(id){
+  vibrate();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function toggleLang(){
+  vibrate();
+  lang = lang === "EN" ? "HI" : "EN";
+  document.getElementById("langBtn").innerText = lang === "EN" ? "हिंदी" : "English";
+  updateText();
+}
+
+function updateText(){
+  startBtn.innerText = text[lang].start;
+  next1.innerText = text[lang].next;
+  next2.innerText = text[lang].next;
+  loginBtn.innerText = text[lang].login;
+  cropBtn.innerText = text[lang].crop;
+  soilBtn.innerText = text[lang].soil;
+  analyzeBtn.innerText = text[lang].analyze;
+  thankText.innerText = text[lang].thank;
+}
+
+function saveLogin(){
+  farmer = farmerInput.value;
+  locationName = locationInput.value || fakeLocation;
+  gpsText.innerText = "📍 Detected Location: " + locationName;
+  show('select');
+}
+
+/* OPTION 1: CAMERA TRIGGERS HERE */
+function setMode(m){
+  vibrate();
+  mode = m;
+  confidence = (m === "CROP") ? 94 : 91;
+
+  // Trigger camera immediately
+  hiddenCamera.click();
+}
+
+/* Handle captured image */
+function handleCapture(){
+  const file = hiddenCamera.files[0];
+  if (!file) return;
+
+  show('upload');
+
+  const r = new FileReader();
+  r.onload = e => {
+    previewImg.src = e.target.result;
+    previewBox.style.display = "block";
+  };
+  r.readAsDataURL(file);
+}
+
+function analyze(){
+  vibrate(80);
+  progress.style.display = "block";
+  result.style.display = "none";
+  bar.style.width = "0%";
+
+  let p = 0;
+  let i = setInterval(()=>{
+    p += 10;
+    bar.style.width = p + "%";
+    if (p >= 100) {
+      clearInterval(i);
+      progress.style.display = "none";
+      showResult();
+      vibrate(120);
+    }
+  }, 500);
+}
+
+function showResult(){
+  result.innerHTML = `
+    <div class="ring" id="ring">0%</div>
+    <p>
+      <b>👨‍🌾 Farmer:</b> ${farmer}<br>
+      <b>📍 Location:</b> ${locationName}<br>
+      <b>${mode === "CROP" ? "🌱 Disease" : "🧪 Soil Health"}:</b>
+      ${mode === "CROP" ? "Leaf Blight" : "Nitrogen Deficient"}
+    </p>
+
+    <a href="samplereport.pdf" target="_blank">
+      <button>📄 Download Detailed Report</button>
+    </a>
+
+    <button onclick="show('thank')">Finish</button>
+  `;
+
+  const ring = document.getElementById("ring");
+  ring.style.background =
+    `conic-gradient(#2e7d32 ${confidence * 3.6}deg, #c8e6c9 0deg)`;
+  ring.innerText = confidence + "%";
+
+  result.style.display = "block";
+}
+</script>
+</head>
+
+<body>
+
+<div class="phone">
+
+<!-- HIDDEN CAMERA -->
+<input
+  type="file"
+  id="hiddenCamera"
+  accept="image/*"
+  capture="environment"
+  style="display:none"
+  onchange="handleCapture()"
+/>
+
+<!-- TITLE -->
+<div id="title" class="page active center">
+  <div class="top">
+    <span></span>
+    <span id="langBtn" class="lang" onclick="toggleLang()">हिंदी</span>
+  </div>
+  <img src="logo.png" width="80">
+  <h1>AgroNetra</h1>
+  <p>AI-Powered Crop Health Intelligence</p>
+  <button id="startBtn" onclick="show('about')">Get Started</button>
+</div>
+
+<!-- ABOUT -->
+<div id="about" class="page">
+  <div class="top">
+    <span class="back" onclick="show('title')">← Back</span>
+    <span class="lang" onclick="toggleLang()">🌐</span>
+  </div>
+  <h2>About AgroNetra</h2>
+  <img src="about.png">
+  <p>AI-powered decision support for farmers.</p>
+  <button id="next1" onclick="show('works')">Next</button>
+</div>
+
+<!-- WORKS -->
+<div id="works" class="page">
+  <div class="top">
+    <span class="back" onclick="show('about')">← Back</span>
+  </div>
+  <h2>How It Works</h2>
+  <p>📷 Capture → 🤖 Analyze → ✅ Decide</p>
+  <button id="next2" onclick="show('login')">Next</button>
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="page">
+  <div class="top">
+    <span class="back" onclick="show('works')">← Back</span>
+  </div>
+  <h2>Login</h2>
+  <input id="farmerInput" placeholder="Farmer Name">
+  <input id="locationInput" placeholder="Location (optional)">
+  <p id="gpsText"></p>
+  <button id="loginBtn" onclick="saveLogin()">Login</button>
+</div>
+
+<!-- SELECT -->
+<div id="select" class="page center">
+  <div class="top">
+    <span class="back" onclick="show('login')">← Back</span>
+  </div>
+  <h2>Select Analysis Type</h2>
+  <button id="cropBtn" onclick="setMode('CROP')">🌱 Crop Analysis</button>
+  <button id="soilBtn" class="alt" onclick="setMode('SOIL')">🧪 Soil Analysis</button>
+</div>
+
+<!-- UPLOAD -->
+<div id="upload" class="page">
+  <div class="top">
+    <span class="back" onclick="show('select')">← Back</span>
+  </div>
+  <h2>Image Preview</h2>
+  <div id="previewBox" class="preview"><img id="previewImg"></div>
+  <button id="analyzeBtn" onclick="analyze()">Analyze</button>
+  <div id="progress" class="progress"><div id="bar" class="bar"></div></div>
+  <div id="result" class="result"></div>
+</div>
+
+<!-- THANK -->
+<div id="thank" class="page center">
+  <h2 id="thankText">Thank you for using AgroNetra!</h2>
+  <button onclick="show('title')">Restart</button>
+</div>
+
+</div>
+
+<script>updateText();</script>
+
+</body>
+</html>
