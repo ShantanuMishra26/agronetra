@@ -15,7 +15,7 @@ body {
 .phone {
   max-width: 390px;
   margin: 20px auto;
-  background: #ffffff;
+  background: white;
   border-radius: 26px;
   box-shadow: 0 12px 35px rgba(0,0,0,0.25);
   overflow: hidden;
@@ -37,7 +37,6 @@ body {
 .top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
 
 .back, .lang {
@@ -50,7 +49,7 @@ body {
 
 h1, h2 { color: #2e7d32; }
 
-p { color: #444; font-size: 14px; }
+p { font-size: 14px; color: #444; }
 
 button {
   width: 100%;
@@ -85,10 +84,10 @@ img {
 /* Progress */
 .progress {
   display: none;
-  margin-top: 12px;
   background: #c8e6c9;
   height: 12px;
   border-radius: 10px;
+  margin-top: 12px;
   overflow: hidden;
 }
 
@@ -130,33 +129,33 @@ img {
 </style>
 
 <script>
-let lang = "EN";
-let farmer = "", locationName = "", mode = "CROP", confidence = 94;
-const fakeLocation = "Gurugram, Haryana";
+let lang="EN";
+let farmer="", locationName="", mode="CROP", confidence=94;
+const fakeLocation="Sagar, India";
 
-const text = {
-  EN: {
-    start: "Get Started",
-    next: "Next",
-    login: "Login",
-    crop: "🌱 Crop Analysis",
-    soil: "🧪 Soil Analysis",
-    analyze: "🤖 Analyze",
-    thank: "Thank you for using AgroNetra!"
+const text={
+  EN:{
+    start:"Get Started",
+    next:"Next",
+    login:"Login",
+    crop:"🌱 Crop Analysis",
+    soil:"🧪 Soil Analysis",
+    analyze:"🤖 Analyze",
+    thank:"Thank you for using AgroNetra!"
   },
-  HI: {
-    start: "शुरू करें",
-    next: "आगे",
-    login: "लॉगिन",
-    crop: "🌱 फसल विश्लेषण",
-    soil: "🧪 मिट्टी विश्लेषण",
-    analyze: "🤖 विश्लेषण करें",
-    thank: "एग्रोनैत्रा उपयोग करने के लिए धन्यवाद!"
+  HI:{
+    start:"शुरू करें",
+    next:"आगे",
+    login:"लॉगिन",
+    crop:"🌱 फसल विश्लेषण",
+    soil:"🧪 मिट्टी विश्लेषण",
+    analyze:"🤖 विश्लेषण करें",
+    thank:"एग्रोनैत्रा उपयोग करने के लिए धन्यवाद!"
   }
 };
 
 function vibrate(ms=40){
-  if (navigator.vibrate) navigator.vibrate(ms);
+  if(navigator.vibrate) navigator.vibrate(ms);
 }
 
 function show(id){
@@ -166,97 +165,94 @@ function show(id){
 }
 
 function toggleLang(){
-  vibrate();
-  lang = lang === "EN" ? "HI" : "EN";
-  document.getElementById("langBtn").innerText = lang === "EN" ? "हिंदी" : "English";
+  lang = lang==="EN"?"HI":"EN";
+  langBtn.innerText = lang==="EN"?"हिंदी":"English";
   updateText();
 }
 
 function updateText(){
-  startBtn.innerText = text[lang].start;
-  next1.innerText = text[lang].next;
-  next2.innerText = text[lang].next;
-  loginBtn.innerText = text[lang].login;
-  cropBtn.innerText = text[lang].crop;
-  soilBtn.innerText = text[lang].soil;
-  analyzeBtn.innerText = text[lang].analyze;
-  thankText.innerText = text[lang].thank;
+  startBtn.innerText=text[lang].start;
+  next1.innerText=text[lang].next;
+  next2.innerText=text[lang].next;
+  loginBtn.innerText=text[lang].login;
+  cropBtn.innerText=text[lang].crop;
+  soilBtn.innerText=text[lang].soil;
+  analyzeBtn.innerText=text[lang].analyze;
+  thankText.innerText=text[lang].thank;
 }
 
 function saveLogin(){
-  farmer = farmerInput.value;
-  locationName = locationInput.value || fakeLocation;
-  gpsText.innerText = "📍 Detected Location: " + locationName;
+  farmer=farmerInput.value || "Shantanu";
+  locationName=locationInput.value || fakeLocation;
+  gpsText.innerText="📍 Detected Location: "+locationName;
   show('select');
 }
 
-/* OPTION 1: CAMERA TRIGGERS HERE */
+/* OPTION 1: CAMERA ON MODE SELECTION */
 function setMode(m){
-  vibrate();
-  mode = m;
-  confidence = (m === "CROP") ? 94 : 91;
-
-  // Trigger camera immediately
+  mode=m;
+  confidence=(m==="CROP")?94:91;
   hiddenCamera.click();
 }
 
-/* Handle captured image */
+/* Handle capture */
 function handleCapture(){
-  const file = hiddenCamera.files[0];
-  if (!file) return;
-
+  const file=hiddenCamera.files[0];
+  if(!file) return;
   show('upload');
 
-  const r = new FileReader();
-  r.onload = e => {
-    previewImg.src = e.target.result;
-    previewBox.style.display = "block";
+  const r=new FileReader();
+  r.onload=e=>{
+    previewImg.src=e.target.result;
+    previewBox.style.display="block";
   };
   r.readAsDataURL(file);
 }
 
 function analyze(){
-  vibrate(80);
-  progress.style.display = "block";
-  result.style.display = "none";
-  bar.style.width = "0%";
+  progress.style.display="block";
+  result.style.display="none";
+  bar.style.width="0%";
 
-  let p = 0;
-  let i = setInterval(()=>{
-    p += 10;
-    bar.style.width = p + "%";
-    if (p >= 100) {
+  let p=0;
+  let i=setInterval(()=>{
+    p+=10;
+    bar.style.width=p+"%";
+    if(p>=100){
       clearInterval(i);
-      progress.style.display = "none";
+      progress.style.display="none";
       showResult();
-      vibrate(120);
     }
-  }, 500);
+  },500);
 }
 
 function showResult(){
-  result.innerHTML = `
+  const reportFile=(mode==="CROP")
+    ?"samplereport_crop.pdf"
+    :"samplereport_soil.pdf";
+
+  result.innerHTML=`
     <div class="ring" id="ring">0%</div>
     <p>
       <b>👨‍🌾 Farmer:</b> ${farmer}<br>
       <b>📍 Location:</b> ${locationName}<br>
-      <b>${mode === "CROP" ? "🌱 Disease" : "🧪 Soil Health"}:</b>
-      ${mode === "CROP" ? "Leaf Blight" : "Nitrogen Deficient"}
+      <b>${mode==="CROP"?"🌱 Disease":"🧪 Soil Health"}:</b>
+      ${mode==="CROP"?"Leaf Blight":"Nitrogen Deficient"}
     </p>
 
-    <a href="samplereport.pdf" target="_blank">
+    <a href="${reportFile}" target="_blank">
       <button>📄 Download Detailed Report</button>
     </a>
 
     <button onclick="show('thank')">Finish</button>
   `;
 
-  const ring = document.getElementById("ring");
-  ring.style.background =
-    `conic-gradient(#2e7d32 ${confidence * 3.6}deg, #c8e6c9 0deg)`;
-  ring.innerText = confidence + "%";
+  const ring=document.getElementById("ring");
+  ring.style.background=
+    `conic-gradient(#2e7d32 ${confidence*3.6}deg, #c8e6c9 0deg)`;
+  ring.innerText=confidence+"%";
 
-  result.style.display = "block";
+  result.style.display="block";
 }
 </script>
 </head>
@@ -266,14 +262,9 @@ function showResult(){
 <div class="phone">
 
 <!-- HIDDEN CAMERA -->
-<input
-  type="file"
-  id="hiddenCamera"
-  accept="image/*"
-  capture="environment"
-  style="display:none"
-  onchange="handleCapture()"
-/>
+<input type="file" id="hiddenCamera"
+  accept="image/*" capture="environment"
+  style="display:none" onchange="handleCapture()">
 
 <!-- TITLE -->
 <div id="title" class="page active center">
@@ -337,13 +328,15 @@ function showResult(){
     <span class="back" onclick="show('select')">← Back</span>
   </div>
   <h2>Image Preview</h2>
-  <div id="previewBox" class="preview"><img id="previewImg"></div>
+  <div id="previewBox" class="preview">
+    <img id="previewImg">
+  </div>
   <button id="analyzeBtn" onclick="analyze()">Analyze</button>
   <div id="progress" class="progress"><div id="bar" class="bar"></div></div>
   <div id="result" class="result"></div>
 </div>
 
-<!-- THANK -->
+<!-- THANK YOU -->
 <div id="thank" class="page center">
   <h2 id="thankText">Thank you for using AgroNetra!</h2>
   <button onclick="show('title')">Restart</button>
